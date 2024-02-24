@@ -2,6 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
+import { WebSocketServer } from 'ws';
 
 const httpServer = http.createServer((req, res) => {
   const __dirname = path.resolve(path.dirname(''));
@@ -14,6 +15,19 @@ const httpServer = http.createServer((req, res) => {
     }
     res.writeHead(200);
     res.end(data);
+  });
+});
+
+const wss = new WebSocketServer({ port: 3000, clientTracking: true });
+wss.on('connection', (ws) => {
+  console.log('WebSocket client connected');
+
+  ws.on('message', (message) => {
+    console.log(`Received message: ${message}`);
+  });
+
+  ws.on('close', () => {
+    console.log('WebSocket client disconnected');
   });
 });
 
