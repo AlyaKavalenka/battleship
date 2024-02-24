@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
 import { WebSocketServer } from 'ws';
+import Registration from '../websocket/reg';
 
 const httpServer = http.createServer((req, res) => {
   const __dirname = path.resolve(path.dirname(''));
@@ -24,6 +25,32 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     console.log(`Received message: ${message}`);
+    const messageString = message.toString();
+    const parsedMessage = JSON.parse(messageString);
+    if (parsedMessage.data) {
+      parsedMessage.data = JSON.parse(parsedMessage.data);
+    }
+    
+    console.log('parsedMessage: ', parsedMessage);
+
+    const { type, data, id } = parsedMessage;
+
+    switch (type) {
+      case 'reg':
+        const respData = Registration(data);
+        const resp = {
+          type: "reg",
+          data: JSON.stringify(respData),
+          id: 0,
+        }
+
+        ws.send(JSON.stringify(resp));
+
+        break;
+
+      default:
+        break;
+    }
   });
 
   ws.on('close', () => {
