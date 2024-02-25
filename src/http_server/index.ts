@@ -42,36 +42,33 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
 
     const { type, data, id } = parsedMessage;
 
-    switch (type) {
-      case 'reg':
-        if (ws.id) {
-          const respData = Registration(data, ws.id);
-          const resp = {
-            type: "reg",
-            data: JSON.stringify(respData),
-            id,
-          }
-  
-          ws.send(JSON.stringify(resp));
-          ws.send(updateRoom())
-        } else {
-          console.error('Custom Error: "Something went wrong with ws.id: ', ws.id, ' "')
-        }
-        break;
-      
-      case 'create_room':
-        if(ws.id) {
-          createRoom(ws.id);
-  
-          ws.send(updateRoom())
-        } else {
-          console.error('Custom Error: "Something went wrong with ws.id: ', ws.id, ' "')
-        }
-        
-        break;
+    if (ws.id) {
+      switch (type) {
+        case 'reg':
+            const respData = Registration(data, ws.id);
+            const resp = {
+              type: "reg",
+              data: JSON.stringify(respData),
+              id,
+            }
+    
+            ws.send(JSON.stringify(resp));
+            ws.send(updateRoom())
 
-      default:
-        break;
+          break;
+        
+        case 'create_room':
+            createRoom(ws.id);
+    
+            ws.send(updateRoom())
+
+          break;
+
+        default:
+          break;
+      }
+    } else {
+      console.error('Custom Error: "Something went wrong with ws.id: ', ws.id, ' "')
     }
   });
 
