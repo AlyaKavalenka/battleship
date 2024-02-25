@@ -2,8 +2,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
-import { WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import Registration from '../websocket/reg';
+import { createRoom, updateRoom } from '../websocket/room';
+
+interface CustomWebSocket extends WebSocket {
+  id?: string;
+}
 
 const httpServer = http.createServer((req, res) => {
   const __dirname = path.resolve(path.dirname(''));
@@ -20,8 +25,10 @@ const httpServer = http.createServer((req, res) => {
 });
 
 const wss = new WebSocketServer({ port: 3000, clientTracking: true });
-wss.on('connection', (ws) => {
+wss.on('connection', (ws: CustomWebSocket, req) => {
   console.log('WebSocket client connected');
+  ws.id = req.headers['sec-websocket-key']; 
+
 
   ws.on('message', (message) => {
     console.log(`Received message: ${message}`);
@@ -37,15 +44,30 @@ wss.on('connection', (ws) => {
 
     switch (type) {
       case 'reg':
-        const respData = Registration(data);
-        const resp = {
-          type: "reg",
-          data: JSON.stringify(respData),
-          id: 0,
+        if (ws.id) {
+          const respData = Registration(data, ws.id);
+          const resp = {
+            type: "reg",
+            data: JSON.stringify(respData),
+            id,
+          }
+  
+          ws.send(JSON.stringify(resp));
+          ws.send(updateRoom())
+        } else {
+          console.error('Custom Error: "Something went wrong with ws.id: ', ws.id, ' "')
         }
-
-        ws.send(JSON.stringify(resp));
-
+        break;
+      
+      case 'create_room':
+        if(ws.id) {
+          createRoom(ws.id);
+  
+          ws.send(updateRoom())
+        } else {
+          console.error('Custom Error: "Something went wrong with ws.id: ', ws.id, ' "')
+        }
+        
         break;
 
       default:
