@@ -1,4 +1,4 @@
-import dataBase from './dataBase.ts';
+import dataBase from '../db/dataBase.ts';
 
 export type ResType = {
   name: string;
