@@ -22,7 +22,6 @@ export default function Registration(data: { name: string; password: string; }) 
   const isFoundInDB = dataBase.users.find((item) => item.name === name);
 
   if (!isFoundInDB) {
-    console.log('in if');
     dataBase.users.push({name, password, userId})
     res.index = userId;
     res.error = false;
