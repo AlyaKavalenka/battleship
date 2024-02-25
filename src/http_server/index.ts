@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as http from 'http';
 import { WebSocket, WebSocketServer } from 'ws';
 import Registration from '../websocket/reg';
-import { createRoom, updateRoom } from '../websocket/room';
+import { addUserToRoom, createRoom, updateRoom } from '../websocket/room';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
@@ -61,6 +61,13 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
 
         case 'create_room':
           createRoom(ws.id);
+
+          ws.send(updateRoom());
+
+          break;
+
+        case 'add_user_to_room':
+          addUserToRoom(data, ws.id);
 
           ws.send(updateRoom());
 

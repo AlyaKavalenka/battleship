@@ -6,7 +6,11 @@ type UserType = {
 
 interface DataBase {
   users: UserType[];
-  rooms: { roomId: number | string; roomUsers: UserType[] }[];
+  rooms: {
+    roomId: number | string;
+    roomUsers: UserType[];
+    isAvailable: boolean;
+  }[];
 }
 
 const dataBase: DataBase = {
