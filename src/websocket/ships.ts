@@ -16,6 +16,6 @@ export interface AddShipsData {
   indexPlayer: number | string;
 }
 
-export default function addShips(data: AddShipsData) {
+export function addShips(data: AddShipsData) {
   dataBase.games.push(data);
 }

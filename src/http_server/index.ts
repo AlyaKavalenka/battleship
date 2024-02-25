@@ -10,7 +10,7 @@ import {
   createRoom,
   updateRoom,
 } from '../websocket/room';
-import addShips from '../websocket/ships';
+import { addShips } from '../websocket/ships';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
