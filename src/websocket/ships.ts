@@ -19,3 +19,25 @@ export interface AddShipsData {
 export function addShips(data: AddShipsData) {
   dataBase.games.push(data);
 }
+
+export function startGame(data: AddShipsData) {
+  const { gameId, ships, indexPlayer } = data;
+
+  let resData: {
+    ships: Ship[];
+    currentPlayerIndex: number | string;
+  } | null = null;
+
+  if (dataBase.games.filter((game) => game.gameId == gameId).length === 2) {
+    resData = {
+      ships,
+      currentPlayerIndex: indexPlayer,
+    };
+  }
+
+  return {
+    type: 'start_game',
+    data: resData !== null ? JSON.stringify(data) : null,
+    id: 0,
+  };
+}

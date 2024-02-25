@@ -10,7 +10,7 @@ import {
   createRoom,
   updateRoom,
 } from '../websocket/room';
-import { addShips } from '../websocket/ships';
+import { addShips, startGame } from '../websocket/ships';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
@@ -45,8 +45,6 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
     if (parsedMessage.data) {
       parsedMessage.data = JSON.parse(parsedMessage.data);
     }
-
-    console.log('parsedMessage: ', parsedMessage);
 
     const { type, data, id } = parsedMessage;
 
@@ -83,6 +81,13 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
 
         case 'add_ships':
           addShips(data);
+
+          // eslint-disable-next-line no-case-declarations
+          const startGameRes = startGame(data);
+
+          if (startGameRes.data !== null) {
+            ws.send(JSON.stringify(startGameRes));
+          }
 
           break;
 
