@@ -40,6 +40,7 @@ export function addUserToRoom(
     (room) => room.roomId === indexRoom
   );
   const foundedUserByWsId = dataBase.users.find((user) => user.index === wsId);
+  let res: number | string = '';
 
   if (foundedRoomId !== -1) {
     const copiedRooms = [...dataBase.rooms];
@@ -49,6 +50,8 @@ export function addUserToRoom(
       copiedRooms[foundedRoomId].roomUsers.push({ name, index });
       copiedRooms[foundedRoomId].isAvailable = false;
       dataBase.rooms = copiedRooms;
+
+      res = foundedRoomId;
     } else {
       console.error(
         'Something went wrong when finding user in db',
@@ -67,4 +70,23 @@ export function addUserToRoom(
       indexRoom
     );
   }
+  return res;
+}
+
+export function createGame(props: {
+  idGame: number | string;
+  idPlayer: number | string;
+}) {
+  const { idGame, idPlayer } = props;
+
+  const data = {
+    idGame,
+    idPlayer,
+  };
+
+  return JSON.stringify({
+    type: 'create_game',
+    data: JSON.stringify(data),
+    id: 0,
+  });
 }

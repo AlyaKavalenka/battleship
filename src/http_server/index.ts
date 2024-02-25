@@ -4,7 +4,12 @@ import * as path from 'path';
 import * as http from 'http';
 import { WebSocket, WebSocketServer } from 'ws';
 import Registration from '../websocket/reg';
-import { addUserToRoom, createRoom, updateRoom } from '../websocket/room';
+import {
+  addUserToRoom,
+  createGame,
+  createRoom,
+  updateRoom,
+} from '../websocket/room';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
@@ -51,6 +56,7 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
         data: JSON.stringify(respData),
         id,
       };
+      let idGame: number | string = '';
 
       switch (type) {
         case 'reg':
@@ -67,9 +73,10 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
           break;
 
         case 'add_user_to_room':
-          addUserToRoom(data, ws.id);
+          idGame = addUserToRoom(data, ws.id);
 
           ws.send(updateRoom());
+          ws.send(createGame({ idGame, idPlayer: ws.id }));
 
           break;
 
