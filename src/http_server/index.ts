@@ -10,6 +10,7 @@ import {
   createRoom,
   updateRoom,
 } from '../websocket/room';
+import addShips from '../websocket/ships';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
@@ -77,6 +78,11 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
 
           ws.send(updateRoom());
           ws.send(createGame({ idGame, idPlayer: ws.id }));
+
+          break;
+
+        case 'add_ships':
+          addShips(data);
 
           break;
 
