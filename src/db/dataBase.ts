@@ -2,16 +2,16 @@ type UserType = {
   name: string;
   password?: string;
   index: number | string;
-}
+};
 
 interface DataBase {
   users: UserType[];
-  rooms: {roomId: number | string; roomUsers: UserType[]}[];
-};
+  rooms: { roomId: number | string; roomUsers: UserType[] }[];
+}
 
 const dataBase: DataBase = {
   users: [],
-  rooms: []
+  rooms: [],
 };
 
 export default dataBase;

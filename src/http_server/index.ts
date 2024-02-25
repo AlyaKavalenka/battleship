@@ -12,7 +12,10 @@ interface CustomWebSocket extends WebSocket {
 
 const httpServer = http.createServer((req, res) => {
   const __dirname = path.resolve(path.dirname(''));
-  const filePath = path.join(__dirname, (req.url === '/' ? '/front/index.html' : `/front${req.url}`));
+  const filePath = path.join(
+    __dirname,
+    req.url === '/' ? '/front/index.html' : `/front${req.url}`
+  );
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
@@ -27,8 +30,7 @@ const httpServer = http.createServer((req, res) => {
 const wss = new WebSocketServer({ port: 3000, clientTracking: true });
 wss.on('connection', (ws: CustomWebSocket, req) => {
   console.log('WebSocket client connected');
-  ws.id = req.headers['sec-websocket-key']; 
-
+  ws.id = req.headers['sec-websocket-key'];
 
   ws.on('message', (message) => {
     console.log(`Received message: ${message}`);
@@ -37,30 +39,30 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
     if (parsedMessage.data) {
       parsedMessage.data = JSON.parse(parsedMessage.data);
     }
-    
+
     console.log('parsedMessage: ', parsedMessage);
 
     const { type, data, id } = parsedMessage;
 
     if (ws.id) {
+      const respData = Registration(data, ws.id);
+      const resp = {
+        type: 'reg',
+        data: JSON.stringify(respData),
+        id,
+      };
+
       switch (type) {
         case 'reg':
-            const respData = Registration(data, ws.id);
-            const resp = {
-              type: "reg",
-              data: JSON.stringify(respData),
-              id,
-            }
-    
-            ws.send(JSON.stringify(resp));
-            ws.send(updateRoom())
+          ws.send(JSON.stringify(resp));
+          ws.send(updateRoom());
 
           break;
-        
+
         case 'create_room':
-            createRoom(ws.id);
-    
-            ws.send(updateRoom())
+          createRoom(ws.id);
+
+          ws.send(updateRoom());
 
           break;
 
@@ -68,7 +70,11 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
           break;
       }
     } else {
-      console.error('Custom Error: "Something went wrong with ws.id: ', ws.id, ' "')
+      console.error(
+        'Custom Error: "Something went wrong with ws.id: ',
+        ws.id,
+        ' "'
+      );
     }
   });
 
