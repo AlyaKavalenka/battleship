@@ -5,8 +5,6 @@ export default function playersTurn(gameId: number | string) {
     (game) => game.gameId === gameId
   )?.turn;
 
-  console.log('playersTurn: ', currentPlayer);
-
   return JSON.stringify({
     type: 'turn',
     data: JSON.stringify({
