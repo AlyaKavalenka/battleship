@@ -1,10 +1,10 @@
 import dataBase from '../db/dataBase';
 
 export function createRoom(wsId: number | string) {
-  const foundedUser = dataBase.users.find((user) => user.index === wsId);
+  const foundUser = dataBase.users.find((user) => user.index === wsId);
 
-  if (foundedUser) {
-    const { name, index } = foundedUser;
+  if (foundUser) {
+    const { name, index } = foundUser;
     dataBase.rooms.push({
       roomId: dataBase.rooms.length,
       roomUsers: [{ name, index }],
@@ -13,7 +13,7 @@ export function createRoom(wsId: number | string) {
   } else {
     console.error(
       'Custom Error: Something went wrong with founded user: ',
-      foundedUser,
+      foundUser,
       '.',
       ` wsId: ${wsId}.`,
       ' users in db: ',
@@ -36,22 +36,22 @@ export function addUserToRoom(
 ) {
   const { indexRoom } = data;
 
-  const foundedRoomId = dataBase.rooms.findIndex(
+  const foundRoomId = dataBase.rooms.findIndex(
     (room) => room.roomId === indexRoom
   );
-  const foundedUserByWsId = dataBase.users.find((user) => user.index === wsId);
+  const foundUserByWsId = dataBase.users.find((user) => user.index === wsId);
   let res: number | string = '';
 
-  if (foundedRoomId !== -1) {
+  if (foundRoomId !== -1) {
     const copiedRooms = [...dataBase.rooms];
 
-    if (foundedUserByWsId) {
-      const { name, index } = foundedUserByWsId;
-      copiedRooms[foundedRoomId].roomUsers.push({ name, index });
-      copiedRooms[foundedRoomId].isAvailable = false;
+    if (foundUserByWsId) {
+      const { name, index } = foundUserByWsId;
+      copiedRooms[foundRoomId].roomUsers.push({ name, index });
+      copiedRooms[foundRoomId].isAvailable = false;
       dataBase.rooms = copiedRooms;
 
-      res = foundedRoomId;
+      res = foundRoomId;
     } else {
       console.error(
         'Something went wrong when finding user in db',
