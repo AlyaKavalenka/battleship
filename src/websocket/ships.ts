@@ -23,22 +23,15 @@ export function addShips(data: AddShipsData) {
 export function startGame(data: AddShipsData) {
   const { gameId, ships, indexPlayer } = data;
 
-  let resData: {
-    ships: Ship[];
-    currentPlayerIndex: number | string;
-  } | null = null;
-
-  // TODO: fix next player goes
-  if (dataBase.games.filter((game) => game.gameId == gameId).length === 2) {
-    resData = {
-      ships,
-      currentPlayerIndex: indexPlayer,
-    };
-  }
+  const foundGame = dataBase.games.findIndex((game) => game.gameId === gameId);
+  dataBase.games[foundGame].turn = indexPlayer;
 
   return {
     type: 'start_game',
-    data: resData !== null ? JSON.stringify(data) : null,
+    data: JSON.stringify({
+      ships,
+      currentPlayerIndex: indexPlayer,
+    }),
     id: 0,
   };
 }

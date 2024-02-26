@@ -17,6 +17,7 @@ export type GameType = {
   }[];
   indexPlayer: number | string;
   matrix?: number[][];
+  turn?: number | string;
 };
 
 interface DataBase {

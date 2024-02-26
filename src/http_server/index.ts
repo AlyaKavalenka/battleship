@@ -11,6 +11,8 @@ import {
   createRoom,
   updateRoom,
 } from '../websocket/room';
+import dataBase from '../db/dataBase';
+import playersTurn from '../websocket/playersTurn';
 import { addShips, startGame } from '../websocket/ships';
 import { attack } from '../websocket/game';
 
@@ -83,10 +85,20 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
         case 'add_ships':
           addShips(data);
 
-          const startGameRes = startGame(data);
+          const currentGames = dataBase.games.filter(
+            (game) => game.gameId == data.gameId
+          );
 
-          if (startGameRes.data !== null) {
-            ws.send(JSON.stringify(startGameRes));
+          if (currentGames.length === 2) {
+            wss.clients.forEach((client) => {
+              if (client.readyState === WebSocket.OPEN) {
+                currentGames.map((game) => {
+                  client.send(JSON.stringify(startGame(game)));
+                });
+
+                client.send(playersTurn(data.gameId));
+              }
+            });
           }
 
           break;
