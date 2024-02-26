@@ -14,7 +14,8 @@ import {
 import dataBase from '../db/dataBase';
 import playersTurn from '../websocket/playersTurn';
 import { addShips, startGame } from '../websocket/ships';
-import { attack } from '../websocket/game';
+import { attack, randomAttack } from '../websocket/game';
+import attackFeedback from '../websocket/attackFeedback';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
@@ -104,10 +105,37 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
           break;
 
         case 'attack':
-          const attackFeedback = attack(data);
+          const foundGames = dataBase.games.find(
+            (game) => game.gameId === data.gameId
+          );
 
-          if (attackFeedback !== null) {
-            ws.send(attackFeedback);
+          if (foundGames?.turn === data.indexPlayer) {
+            const attackRes = attack(data);
+            const attackFeedbackRes = attackFeedback(attackRes);
+
+            if (attackFeedbackRes !== null) {
+              wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(attackFeedbackRes);
+                  client.send(playersTurn(data.gameId));
+                }
+              });
+            }
+          }
+
+          break;
+
+        case 'randomAttack':
+          const attackResRandom = randomAttack(data);
+          const attackFeedbackResRandom = attackFeedback(attackResRandom);
+
+          if (attackFeedbackResRandom !== null) {
+            wss.clients.forEach((client) => {
+              if (client.readyState === WebSocket.OPEN) {
+                client.send(attackFeedbackResRandom);
+                client.send(playersTurn(data.gameId));
+              }
+            });
           }
           break;
 

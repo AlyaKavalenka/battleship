@@ -24,7 +24,7 @@ function checkShot(props: { currGame: GameType; x: number; y: number }) {
   const { currGame, x, y } = props;
 
   const ships = currGame.ships;
-  let status = '';
+  let status: 'miss' | 'killed' | 'shot' | '' = '';
   let lastShipLength = 0;
   let shotCounter = 0;
 
@@ -70,13 +70,14 @@ function checkShot(props: { currGame: GameType; x: number; y: number }) {
   return status;
 }
 
+// TODO: add after kill sent miss for all cells around ship too
 export function attack(data: AttackData) {
   const { gameId, x, y, indexPlayer } = data;
 
   const foundById = dataBase.games.findIndex(
     (game) => game.gameId === gameId && game.indexPlayer !== indexPlayer
   );
-  let status = '';
+  let status: 'miss' | 'killed' | 'shot' | '' = '';
 
   if (foundById !== -1) {
     const currGame = dataBase.games[foundById];
@@ -89,22 +90,59 @@ export function attack(data: AttackData) {
       currGame.matrix[y][x] = 1;
       status = checkShot({ currGame, x, y }) || '';
     }
+
+    if (status === 'miss') {
+      dataBase.games
+        .filter((fillGame) => fillGame.gameId === gameId)
+        .forEach((game) => (game.turn = dataBase.games[foundById].indexPlayer));
+    }
   } else {
     console.error('Custom Error: This game was not found');
   }
 
-  return status !== ''
-    ? JSON.stringify({
-        type: 'attack',
-        data: JSON.stringify({
-          position: {
-            x,
-            y,
-          },
-          currentPlayer: indexPlayer,
-          status,
-        }),
-        id: 0,
-      })
-    : null;
+  return { status, x, y, indexPlayer };
+}
+
+export function randomAttack(data: {
+  gameId: number | string;
+  indexPlayer: number | string;
+}) {
+  const { gameId, indexPlayer } = data;
+
+  const foundById = dataBase.games.findIndex(
+    (game) => game.gameId === gameId && game.indexPlayer !== indexPlayer
+  );
+
+  let x = 0;
+  let y = 0;
+  let status: 'miss' | 'killed' | 'shot' | '' = '';
+
+  if (foundById !== -1) {
+    const currGame = dataBase.games[foundById];
+
+    if (currGame.matrix === undefined) currGame.matrix = createMatrix();
+
+    for (let i = 0; i < currGame.matrix.length; i++) {
+      for (let k = 0; k < currGame.matrix[i].length; k++) {
+        if (currGame.matrix[i][k] !== 1) {
+          currGame.matrix[i][k] === 1;
+          x = k;
+          y = i;
+          break;
+        }
+      }
+    }
+
+    status = checkShot({ currGame, x, y }) || '';
+
+    if (status === 'miss') {
+      dataBase.games
+        .filter((fillGame) => fillGame.gameId === gameId)
+        .forEach((game) => (game.turn = dataBase.games[foundById].indexPlayer));
+    }
+  } else {
+    console.error('Custom Error: This game was not found');
+  }
+
+  return { status, x, y, indexPlayer };
 }
