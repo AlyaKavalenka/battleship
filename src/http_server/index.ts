@@ -16,6 +16,7 @@ import playersTurn from '../websocket/playersTurn';
 import { addShips, startGame } from '../websocket/ships';
 import { attack, randomAttack } from '../websocket/game';
 import attackFeedback from '../websocket/attackFeedback';
+import updateWinners from '../websocket/updateWinners';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
@@ -64,7 +65,12 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
       switch (type) {
         case 'reg':
           ws.send(JSON.stringify(resp));
-          ws.send(updateRoom());
+          wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(updateRoom());
+            }
+          });
+          updateWinners();
 
           break;
 
@@ -80,6 +86,10 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
 
           ws.send(updateRoom());
           ws.send(createGame({ idGame, idPlayer: ws.id }));
+          // wss.clients.forEach((client) => {
+          //   if (client.readyState === WebSocket.OPEN) {
+          //   }
+          // });
 
           break;
 
@@ -156,4 +166,5 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
   });
 });
 
+export { wss };
 export default httpServer;

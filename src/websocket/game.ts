@@ -1,4 +1,7 @@
+import { WebSocket } from 'ws';
 import dataBase, { GameType } from '../db/dataBase';
+import { wss } from '../http_server';
+import updateWinners from './updateWinners';
 
 interface AttackData {
   gameId: number | string;
@@ -96,6 +99,19 @@ export function attack(data: AttackData) {
         .filter((fillGame) => fillGame.gameId === gameId)
         .forEach((game) => (game.turn = dataBase.games[foundById].indexPlayer));
     }
+
+    if (status === 'killed') {
+      const killsCount = currGame.killsCount;
+      if (killsCount) {
+        dataBase.games[foundById].killsCount = killsCount + 1;
+      } else {
+        dataBase.games[foundById].killsCount = 1;
+      }
+
+      if (killsCount === 9) {
+        finish({ winPlayer: indexPlayer });
+      }
+    }
   } else {
     console.error('Custom Error: This game was not found');
   }
@@ -140,9 +156,55 @@ export function randomAttack(data: {
         .filter((fillGame) => fillGame.gameId === gameId)
         .forEach((game) => (game.turn = dataBase.games[foundById].indexPlayer));
     }
+
+    if (status === 'killed') {
+      const killsCount = currGame.killsCount;
+      if (killsCount) {
+        dataBase.games[foundById].killsCount = killsCount + 1;
+      } else {
+        dataBase.games[foundById].killsCount = 1;
+      }
+
+      if (killsCount === 9) {
+        finish({ winPlayer: indexPlayer });
+      }
+    }
   } else {
     console.error('Custom Error: This game was not found');
   }
 
   return { status, x, y, indexPlayer };
+}
+
+export function finish(data: { winPlayer: number | string }) {
+  const { winPlayer } = data;
+
+  console.log('in fiinish');
+
+  const foundWinUserIndex = dataBase.wins.findIndex(
+    (winUser) => winUser.winPlayer === winPlayer
+  );
+  if (foundWinUserIndex !== -1) {
+    dataBase.wins[foundWinUserIndex].wins = dataBase.wins[foundWinUserIndex]
+      .wins++;
+  } else {
+    const name = dataBase.users.find((user) => user.index === winPlayer)?.name;
+    if (name) dataBase.wins.push({ name, wins: 1, winPlayer });
+  }
+
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(
+        JSON.stringify({
+          type: 'finish',
+          data: JSON.stringify({
+            winPlayer,
+          }),
+          id: 0,
+        })
+      );
+    }
+  });
+
+  updateWinners();
 }

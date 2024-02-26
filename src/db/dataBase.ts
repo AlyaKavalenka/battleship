@@ -18,6 +18,13 @@ export type GameType = {
   indexPlayer: number | string;
   matrix?: number[][];
   turn?: number | string;
+  killsCount?: number;
+};
+
+type WinType = {
+  winPlayer: number | string;
+  name: string;
+  wins: number;
 };
 
 interface DataBase {
@@ -28,12 +35,14 @@ interface DataBase {
     isAvailable: boolean;
   }[];
   games: GameType[];
+  wins: WinType[];
 }
 
 const dataBase: DataBase = {
   users: [],
   rooms: [],
   games: [],
+  wins: [],
 };
 
 export default dataBase;
