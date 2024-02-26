@@ -28,6 +28,7 @@ export function startGame(data: AddShipsData) {
     currentPlayerIndex: number | string;
   } | null = null;
 
+  // TODO: fix next player goes
   if (dataBase.games.filter((game) => game.gameId == gameId).length === 2) {
     resData = {
       ships,

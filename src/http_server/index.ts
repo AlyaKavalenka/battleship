@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 /* eslint-disable no-underscore-dangle */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -11,6 +12,7 @@ import {
   updateRoom,
 } from '../websocket/room';
 import { addShips, startGame } from '../websocket/ships';
+import { attack } from '../websocket/game';
 
 interface CustomWebSocket extends WebSocket {
   id?: string;
@@ -39,7 +41,6 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
   ws.id = req.headers['sec-websocket-key'];
 
   ws.on('message', (message) => {
-    console.log(`Received message: ${message}`);
     const messageString = message.toString();
     const parsedMessage = JSON.parse(messageString);
     if (parsedMessage.data) {
@@ -82,13 +83,20 @@ wss.on('connection', (ws: CustomWebSocket, req) => {
         case 'add_ships':
           addShips(data);
 
-          // eslint-disable-next-line no-case-declarations
           const startGameRes = startGame(data);
 
           if (startGameRes.data !== null) {
             ws.send(JSON.stringify(startGameRes));
           }
 
+          break;
+
+        case 'attack':
+          const attackFeedback = attack(data);
+
+          if (attackFeedback !== null) {
+            ws.send(attackFeedback);
+          }
           break;
 
         default:

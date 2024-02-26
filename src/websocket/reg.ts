@@ -23,7 +23,6 @@ export default function Registration(
   const isFoundInDB = dataBase.users.findIndex(
     (user) => user.index === wsId || user.name === name
   );
-  console.log('is founded in users', isFoundInDB);
 
   if (isFoundInDB === -1) {
     dataBase.users.push({ name, password, index: wsId });

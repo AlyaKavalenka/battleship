@@ -4,7 +4,7 @@ type UserType = {
   index: number | string;
 };
 
-type GameType = {
+export type GameType = {
   gameId: number | string;
   ships: {
     position: {
@@ -16,6 +16,7 @@ type GameType = {
     type: 'small' | 'medium' | 'large' | 'huge';
   }[];
   indexPlayer: number | string;
+  matrix?: number[][];
 };
 
 interface DataBase {
